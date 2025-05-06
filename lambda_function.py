@@ -63,28 +63,47 @@ def lambda_handler(event, context):
         dict: Response with status code and message
     """
     try:
-        # Get zip code from event, default to "15221" if not provided
-        zip_code = event.get("zip_code", "15221")
-        
-        # Create WeatherForecast instance with zip code
-        forecast = WeatherForecast(zip_code=zip_code)
-        
-        # Get weather data
-        weather_data = forecast.get_forecast()
-        
-        # Post to Timestream
-        success = post_to_timestream(weather_data)
-        
-        if success:
+        # Handle GET requests for usage information
+        if event.get("requestContext", {}).get("http", {}).get("method") == "GET":
             return {
-                'statusCode': 202,
-                'body': json.dumps("Success! Weather data was posted to timestream!")
+                'statusCode': 200,
+                'body': json.dumps({
+                    "expected_payload": {
+                        "zip_code": "string (US zip code)"
+                    }
+                })
             }
-        else:
-            return {
-                'statusCode': 202,
-                'body': json.dumps("Error! Could not post to timestream!")
-            }
+        
+        # Handle POST requests for weather data
+        if event.get("requestContext", {}).get("http", {}).get("method") == "POST":
+            body = json.loads(event.get("body", "{}"))
+            zip_code = body.get("zip_code", "15221")
+            
+            # Create WeatherForecast instance with zip code
+            forecast = WeatherForecast(zip_code=zip_code)
+            
+            # Get weather data
+            weather_data = forecast.get_forecast()
+            
+            # Post to Timestream
+            success = post_to_timestream(weather_data)
+            
+            if success:
+                return {
+                    'statusCode': 202,
+                    'body': json.dumps("Success! Weather data was posted to timestream!")
+                }
+            else:
+                return {
+                    'statusCode': 202,
+                    'body': json.dumps("Error! Could not post to timestream!")
+                }
+        
+        # Handle unsupported methods
+        return {
+            'statusCode': 405,
+            'body': json.dumps("Method not allowed")
+        }
             
     except ValueError as e:
         return {
