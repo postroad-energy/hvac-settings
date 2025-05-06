@@ -1,0 +1,20 @@
+[project]
+name = "hvac-settings"
+version = "0.1.0"
+description = "This package creates the endpoint for weather forecast and safety limits for the hvac in a given location"
+authors = [
+    {name = "Adhithyan Sakthivelu",email = "admkr.2010@gmail.com"}
+]
+license = {text = "MIT License"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "boto3",
+    "urllib3",
+    "haversine"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
