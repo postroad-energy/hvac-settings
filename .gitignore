@@ -21,10 +21,8 @@ wheels/
 *.egg
 
 # Virtual Environment
-.env
-.venv
-env/
 venv/
+env/
 ENV/
 
 # IDE
@@ -32,6 +30,19 @@ ENV/
 .vscode/
 *.swp
 *.swo
+
+# Testing and Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Code Style
+.flake8
+
+# Logs
+*.log
 
 # OS
 .DS_Store

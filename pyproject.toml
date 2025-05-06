@@ -1,20 +1,51 @@
-[project]
+[tool.poetry]
 name = "hvac-settings"
 version = "0.1.0"
-description = "This package creates the endpoint for weather forecast and safety limits for the hvac in a given location"
-authors = [
-    {name = "Adhithyan Sakthivelu",email = "admkr.2010@gmail.com"}
-]
-license = {text = "MIT License"}
+description = "A Python package for HVAC system settings and weather forecast integration"
+authors = ["Adhithyan Sakthivelu <admkr.2010@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.10"
-dependencies = [
-    "boto3",
-    "urllib3",
-    "haversine"
-]
+packages = [{include = "hvac_settings"}]
 
+[tool.poetry.dependencies]
+python = "^3.10"
+boto3 = "^1.34.0"
+urllib3 = "^2.0.0"
+haversine = "^2.8.0"
+bumpver = "^2024.1130"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+flake8 = "^6.1.0"
+black = "^23.7.0"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=hvac_settings"
+
+[tool.black]
+line-length = 127
+target-version = ['py310']
+include = '\.pyi?$'
+
+[tool.bumpver]
+current_version = "0.1.0"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message = "bump version {old_version} -> {new_version}"
+tag_message = "{new_version}"
+commit = true
+tag = true
+push = true
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'version = "{version}"',
+]
+"hvac_settings/__init__.py" = [
+    '__version__ = "{version}"',
+]
