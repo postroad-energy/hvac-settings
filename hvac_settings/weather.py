@@ -44,7 +44,6 @@ class WeatherForecast:
         Raises:
             ValueError: If neither zip_code nor both latitude and longitude are provided
         """
-        # print(f"\nInitializing WeatherForecast with: latitude={latitude}, longitude={longitude}, zip_code={zip_code}")
         if zip_code:
             self._get_coordinates_from_zip(zip_code)
         elif latitude is not None and longitude is not None:
@@ -52,7 +51,6 @@ class WeatherForecast:
             self.longitude = longitude
         else:
             raise ValueError("Either zip_code or both latitude and longitude must be provided")
-        # print(f"Initialized coordinates: latitude={self.latitude}, longitude={self.longitude}")
         self.grid_id = None
         self.grid_x = None
         self.grid_y = None
@@ -60,20 +58,16 @@ class WeatherForecast:
     def _get_coordinates_from_zip(self, zip_code: str) -> None:
         """Get coordinates from zip code using OpenStreetMap."""
         zip_code_url = OPEN_STREET_MAP + zip_code + LAT_LON_FORMAT
-        # print(f"\nFetching coordinates from URL: {zip_code_url}")
         coordinates_results = self._get_requests(zip_code_url)
-        # print(f"Coordinates results: {coordinates_results}")
         
         if coordinates_results is None or not coordinates_results:
             raise ValueError(f"Could not get coordinates for zip code {zip_code}")
         
         self.latitude = float(FOUR_DEC_PLACES % float(coordinates_results[0]["lat"]))
         self.longitude = float(FOUR_DEC_PLACES % float(coordinates_results[0]["lon"]))
-        # print(f"Parsed coordinates: latitude={self.latitude}, longitude={self.longitude}")
     
     def _get_requests(self, url: str) -> dict:
         """Make HTTP GET request with retries."""
-        # print(f"\nMaking request to: {url}")
         data = None
         retries = Retry(connect=3, status=2)
         headers = {'User-Agent': 'sampleWeatherAPI.com'}
@@ -106,7 +100,6 @@ class WeatherForecast:
             
         coordinates = f"{self.latitude},{self.longitude}"
         nwc_points_full_url = NWC_POINTS_BASE_URL + coordinates
-        # print(f"Fetching grid coordinates from: {nwc_points_full_url}")
         metadata = self._get_requests(nwc_points_full_url)
         if metadata is None:
             raise ValueError("Could not get weather metadata")
@@ -115,7 +108,6 @@ class WeatherForecast:
         self.grid_id = properties["gridId"]
         self.grid_x = properties["gridX"]
         self.grid_y = properties["gridY"]
-        # print(f"Grid coordinates: id={self.grid_id}, x={self.grid_x}, y={self.grid_y}")
     
     def get_forecast(self, hours: int = 24) -> dict:
         """
@@ -154,6 +146,7 @@ class WeatherForecast:
                     "hour": hours_ahead + 1,  # Make hours 1-based instead of 0-based
                     "time": period["startTime"],
                     "temperature": period["temperature"],
+                    "humidity": period["relativeHumidity"]["value"],
                     "is_daytime": period.get("isDaytime", True)
                 })
         
@@ -193,12 +186,10 @@ class WeatherForecast:
             raise ValueError("Could not get observation stations")
             
         list_of_station_id = observation_stations["features"]
-        # print(f"Found {len(list_of_station_id)} observation stations")
         current_weather_data = None
         
         for station in list_of_station_id:
             station_id = station["properties"]["stationIdentifier"]
-            # print(f"\nTrying station: {station_id}")
             current_weather_data = self._validate_and_format_weather_data(station_id, coordinates)
             
             if current_weather_data is not None:
@@ -210,24 +201,19 @@ class WeatherForecast:
                     zip_code_coordinates,
                     unit=Unit.KILOMETERS
                 )
-                # print(f"Station distance: {actual_distance:.2f} km")
                 
                 if actual_distance <= RADIUS_LIMIT:
-                    # print(f"Found suitable station within {RADIUS_LIMIT} km radius")
                     break
                 current_weather_data = None
         
         if current_weather_data is None:
             raise ValueError("Could not get valid weather data")
             
-        # print(f"\nFinal weather data: {json.dumps(current_weather_data, indent=2)}")
         return current_weather_data
     
     def _validate_and_format_weather_data(self, station_id: str, zip_code: str) -> dict:
         """Validate and format weather data from a station."""
-        # print(f"\nValidating weather data for station: {station_id}")
         observation_station_full_url = STATION_BASE_URL + station_id + STATION_LATEST
-        # print(f"Fetching observation station data from: {observation_station_full_url}")
         latest_observation_data = self._get_requests(observation_station_full_url)
         if latest_observation_data is None:
             return None
@@ -259,12 +245,11 @@ class WeatherForecast:
             "wind_speed": wind_speed,
             "wind_direction": wind_direction
         }
-        # print(f"Formatted weather data: {json.dumps(formatted_data, indent=2)}")
         return formatted_data
 
 
 if __name__ == "__main__":
-    weather = WeatherForecast(zip_code="78653")
+    weather = WeatherForecast(zip_code="94305")
     print("\nCurrent Weather:")
     print(weather.get_current_weather())
     print("\n24-Hour Temperature Forecast:")

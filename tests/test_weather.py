@@ -210,12 +210,14 @@ def test_get_forecast_hourly_success(mock_requests):
     first_hour = hourly_forecasts[0]
     assert first_hour["hour"] == 1  # First hour ahead
     assert first_hour["temperature"] == 72
+    assert first_hour["humidity"] == 45
     assert first_hour["is_daytime"] is True
     
     # Check second hour forecast
     second_hour = hourly_forecasts[1]
     assert second_hour["hour"] == 2  # Second hour ahead
     assert second_hour["temperature"] == 74
+    assert second_hour["humidity"] == 42
     assert second_hour["is_daytime"] is True
 
 def test_get_forecast_hourly_invalid_hours():
